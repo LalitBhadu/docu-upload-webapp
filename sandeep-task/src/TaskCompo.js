@@ -21,8 +21,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { FaCalendarAlt } from "react-icons/fa";
 import { Checkbox, CheckboxGroup } from "@chakra-ui/react";
+import { useToast } from "@chakra-ui/react";
 
 const TaskCompo = () => {
+  const toast = useToast();
   const [selectedDate, setSelectedDate] = useState(null);
   const CustomInput = ({ value, onClick }) => (
     <InputGroup>
@@ -96,6 +98,11 @@ const TaskCompo = () => {
     const newRows = [...rows];
     newRows[index] = { ...newRows[index], file };
     setRows(newRows);
+  };
+  const handleFileLabelClick = (index) => {
+    if (index === 0) {
+      document.getElementById(`fileInput-${index}`).click();
+    }
   };
 
   const [showAlert, setShowAlert] = useState(false);
@@ -286,12 +293,20 @@ const TaskCompo = () => {
                   <FormControl isRequired>
                     <FormLabel>Upload Document</FormLabel>
                     <Input
+                      id={`fileInput-${index}`}
                       type="file"
+                      style={{ display: "none" }}
                       onChange={(e) =>
                         handleFileChange(index, e.target.files[0])
                       }
-                      disabled={index !== 0} // Disable file input for non-first rows
                     />
+                    <label
+                      htmlFor={`fileInput-${index}`}
+                      onClick={() => handleFileLabelClick(index)}
+                      style={{ cursor: "pointer", width: "100%" }}
+                    >
+                      {row.file ? row.file.name : "Choose File"}
+                    </label>
                   </FormControl>
                 </div>
                 <div
@@ -315,12 +330,14 @@ const TaskCompo = () => {
                 </div>
               </div>
             ))}
-            {showAlert && (
-              <Alert status="warning" marginTop="10px">
-                <AlertIcon />
-                Please fill all fields before adding a new row.
-              </Alert>
-            )}
+            {showAlert &&
+              toast({
+                title: "Please Fill the All Inputes.",
+                status: "success",
+                duration: 2000,
+                isClosable: true,
+                position: "top-right",
+              })}
           </div>
         </Center>
 
