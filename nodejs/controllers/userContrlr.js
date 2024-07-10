@@ -2,32 +2,44 @@ const userModel = require('../models/userModels.js');
 
 exports.createUsers = async (req, res) => {
     try {
-        const { firstName, lastName, dob, residentialAddress, permanentAddress, sameAsResidential, documents } = req.body;
+        const { firstName, lastName, email, dateOfBirth, residentialAddress, permanentAddress, isSameAddress, documents } = req.body;
 
-        // Validate age
-        const age = new Date().getFullYear() - new Date(dob).getFullYear();
-        if (age < 18) {
-            return res.status(400).json({ message: 'user must be at least 18 years old' });
+        // Validate date of birth (minimum age 18)
+        const minAge = 18;
+        const today = new Date();
+        const birthDate = new Date(dateOfBirth);
+        const age = today.getFullYear() - birthDate.getFullYear();
+        const monthDifference = today.getMonth() - birthDate.getMonth();
+
+        if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
         }
 
-        // Validate documents
-        if (documents.length < 2) {
-            return res.status(400).json({ message: 'At least two documents are required' });
+        if (age < minAge) {
+            return res.status(400).json({ message: 'user must be at least 18 years old.' });
         }
 
-        const user = new user({
+        // Validate at least two documents
+        // if (documents.length < 2) {
+        //   return res.status(400).json({ message: 'At least two documents are required.' });
+        // }
+
+        // Save candidate to database
+        const candidate = new userModel({
             firstName,
             lastName,
-            dob,
+            email,
+            dateOfBirth,
             residentialAddress,
-            permanentAddress,
-            sameAsResidential,
+            permanentAddress: isSameAddress ? residentialAddress : permanentAddress,
+            isSameAddress,
             documents
         });
 
-        await userModel.save();
-        res.status(201).json({ message: 'user created successfully', user });
+        await candidate.save();
+        res.status(201).json({ message: 'user created successfully.' });
     } catch (error) {
-        res.status(500).json({ message: 'Server error', error });
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 };

@@ -9,18 +9,21 @@ const documentSchema = new mongoose.Schema({
 const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    email: { type: String, required: true },
-    dob: { type: Date, required: true },
+    email: { type: String, required: true, unique: true },
+    dateOfBirth: { type: Date, required: true },
     residentialAddress: {
         street1: { type: String, required: true },
-        street2: { type: String }
+        street2: { type: String, required: true }
     },
     permanentAddress: {
-        street1: { type: String, required: function () { return !this.sameAsResidential; } },
-        street2: { type: String, required: function () { return !this.sameAsResidential; } }
+        street1: { type: String, required: function () { return !this.isSameAddress; } },
+        street2: { type: String, required: function () { return !this.isSameAddress; } }
     },
-    sameAsResidential: { type: Boolean, default: false },
-    documents: { type: [documentSchema], required: true }
+    isSameAddress: { type: Boolean, default: true },
+    documents: [documentSchema]
 });
 
-module.exports = mongoose.model('User', userSchema);
+
+const user = mongoose.model('User', userSchema);
+
+module.exports = user;
