@@ -18,13 +18,7 @@ exports.createUsers = async (req, res) => {
         if (age < minAge) {
             return res.status(400).json({ message: 'user must be at least 18 years old.' });
         }
-
-        // Validate at least two documents
-        // if (documents.length < 2) {
-        //   return res.status(400).json({ message: 'At least two documents are required.' });
-        // }
-
-        // Save candidate to database
+        
         const candidate = new userModel({
             firstName,
             lastName,
